@@ -100,6 +100,66 @@ async fn main() {
 }
 ```
 
+## Python Usage
+
+The Python bindings are built using PyO3 and maturin. Install from the local source:
+
+```bash
+# From the `ixaccess` project root directory
+cd py/ixaccess
+pip install maturin
+maturin develop
+```
+
+Or build and install a wheel:
+
+```bash
+cd py/ixaccess
+pip install maturin
+maturin build --release
+pip install target/wheels/*.whl
+```
+
+### Example
+
+```python
+from ixaccess import IxAccessClient
+
+# Initialize the client with a path to the state file in Google Cloud Storage.
+# This will create the file if it doesn't exist.
+client = IxAccessClient("gs://your-bucket/access-control.ix")
+
+# --- Role Management ---
+print("Adding roles...")
+client.add_role("admin")
+client.add_role("editor")
+client.add_role("viewer")
+
+# --- Role Assignment (Inheritance) ---
+# 'admin' inherits all permissions from 'editor'.
+# 'editor' inherits all permissions from 'viewer'.
+print("Assigning roles...")
+client.assign_role("admin", "editor")
+client.assign_role("editor", "viewer")
+
+# --- Resource Assignment ---
+# Assign a GCS bucket to the 'viewer' role.
+print("Assigning resources...")
+client.assign_resource_to_role("viewer", "gcs_bucket", "data-bucket-1")
+
+# --- Access Checks ---
+print("Performing access checks...")
+# The 'admin' role has access because it inherits from 'viewer'.
+admin_buckets = client.get_all_resources_for_role_by_tag("admin", "gcs_bucket")
+assert "data-bucket-1" in admin_buckets
+print(f"'admin' has access to: {admin_buckets}")
+
+# The 'viewer' role has direct access.
+viewer_buckets = client.get_all_resources_for_role_by_tag("viewer", "gcs_bucket")
+assert "data-bucket-1" in viewer_buckets
+print(f"'viewer' has access to: {viewer_buckets}")
+```
+
 ## R Usage
 
 Install the R package from the local source:
