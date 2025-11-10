@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+
+# Rust/Cargo
+target/
+Cargo.lock
+**/*.rs.bk
+
+# maturin
+.maturin/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Example files
+example-access-control.ix
+*.ixaccess
+
+# macOS
+.DS_Store
