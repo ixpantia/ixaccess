@@ -5,19 +5,22 @@ edition = "2024"
 
 [dependencies]
 arc-swap = "1.7.1"
-bincode = { version = "2.0.1", features = ["serde"] }
+bincode = { version = "2.0.1" }
 bytes = "1.10.1"
-dashmap = { version = "6.1.0", features = ["serde"] }
+extendr-api = { version = "0.8.1", optional = true }
 futures = "0.3.31"
 object_store = { version = "0.12.4", features = ["fs", "gcp", "azure", "aws"] }
 thiserror = "2.0.17"
-tokio = { version = "1.48.0", features = ["full"] }
 
 [dev-dependencies]
 quickcheck = "1.0.3"
 quickcheck_macros = "1.1.0"
 criterion = { version = "0.5", features = ["async_tokio", "html_reports"] }
+tokio = { version = "1.48.0", features = ["full"] }
 
 [[bench]]
 name = "client_benchmarks"
 harness = false
+
+[features]
+extendr-api = ["dep:extendr-api"]

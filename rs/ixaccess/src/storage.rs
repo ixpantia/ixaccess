@@ -63,6 +63,13 @@ pub enum StorageError {
     Generic(String),
 }
 
+#[cfg(feature = "extendr-api")]
+impl From<StorageError> for extendr_api::Error {
+    fn from(err: StorageError) -> Self {
+        extendr_api::Error::Other(err.to_string())
+    }
+}
+
 /// Create storage backend from a path string.
 ///
 /// Supports local filesystem, GCS, S3, and Azure blob storage URIs.
