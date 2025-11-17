@@ -3,7 +3,6 @@ name = 'ixaccess-r'
 publish = false
 version = '0.1.0'
 edition = '2021'
-rust-version = '1.65'
 
 [lib]
 crate-type = [ 'staticlib' ]
@@ -12,7 +11,7 @@ name = 'ixaccess'
 [dependencies]
 extendr-api = '0.8.1'
 ixaccess = { path = "../../../../rs/ixaccess", features = ["extendr-api"] }
-tokio = { version = "1.38.2", features = ["rt-multi-thread"] }
+tokio = { version = "1", features = ["rt-multi-thread"] }
 
 [profile.release]
 lto = true

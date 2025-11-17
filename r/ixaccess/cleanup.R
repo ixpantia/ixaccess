@@ -28,3 +28,12 @@ if (file.exists(top_cargo_toml)) {
   lines <- gsub("rust", "r/ixaccess/src/rust", lines, fixed = TRUE)
   writeLines(lines, top_cargo_toml)
 }
+
+unlink(
+  c(
+    "src/rust/vendor",
+    "src/rust/vendor.tar.xz",
+    "src/rust/vendor-config.toml"
+  ),
+  recursive = TRUE
+)

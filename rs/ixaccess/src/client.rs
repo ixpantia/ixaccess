@@ -281,11 +281,11 @@ impl IxAccessClient {
         // Check and update if file changed
         let state = self.update_if_changed().await?;
 
-        Ok(state
+        let resources = state
             .structure
-            .get_all_resources_for_role_by_tag(&role, tag)?
-            .map(|s| s.to_string())
-            .collect())
+            .get_all_resources_for_role_by_tag(&role, tag)?;
+
+        Ok(resources.map(|s| s.to_string()).collect())
     }
 
     /// Removes a role assignment.

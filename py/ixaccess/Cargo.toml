@@ -9,5 +9,5 @@ crate-type = ["cdylib"]
 
 [dependencies]
 ixaccess = { path = "../../rs/ixaccess" }
-pyo3 = { version = "0.22", features = ["extension-module"] }
-tokio = { version = "1.48.0", features = ["rt-multi-thread", "macros"] }
+pyo3 = { version = "0.27", features = ["extension-module"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
