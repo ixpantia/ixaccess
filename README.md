@@ -1,6 +1,9 @@
 # IxAccess
 
-IxAccess is a library for managing access control roles and resources in a hierarchical structure. It stores its state in a single file on a cloud object store (like GCS, S3, or Azure Blob Storage), making it easy to share access control policies across multiple services and environments.
+IxAccess is a library for managing access control roles and resources in a
+hierarchical structure. It stores its state in a single file on a cloud object
+store (like GCS, S3, or Azure Blob Storage), making it easy to share access
+control policies across multiple services and environments.
 
 The client is designed for high performance and safety, featuring:
 *   An in-memory, thread-safe cache for fast read access.
@@ -9,32 +12,44 @@ The client is designed for high performance and safety, featuring:
 
 ## Cloud Storage and Authentication
 
-The client uses URLs to specify the location of the state file in the object store. The URL scheme determines the cloud provider:
+The client uses URLs to specify the location of the state file in the object
+store. The URL scheme determines the cloud provider:
 
 - **Google Cloud Storage:** `gs://<bucket>/<path>`
 - **Amazon S3:** `s3://<bucket>/<path>`
 - **Azure Blob Storage:** `az://<container>/<path>`
 - **Local file:** `/path/to/file` or `file:///path/to/file`
 
-Authentication is handled automatically by the underlying `object_store` crate, which uses the standard environment variables and credential resolution methods for each cloud provider.
+Authentication is handled automatically by the underlying `object_store` crate,
+which uses the standard environment variables and credential resolution methods
+for each cloud provider.
 
 ### Google Cloud Platform
 
-The client will use the Application Default Credentials (ADC). You can provide credentials by:
-- Setting the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to the path of a service account key file.
-- Running on a GCP service (e.g., GCE, GKE, Cloud Run) with a service account attached.
-- Authenticating with the gcloud CLI using `gcloud auth application-default login`.
+The client will use the Application Default Credentials (ADC). You can provide
+credentials by:
+
+- Setting the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to the path
+  of a service account key file.
+- Running on a GCP service (e.g., GCE, GKE, Cloud Run) with a service account
+  attached.
+- Authenticating with the gcloud CLI using `gcloud auth application-default
+  login`.
 
 ### Amazon Web Services
 
-The client will use the default credential provider chain. This typically involves:
-- `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_SESSION_TOKEN` environment variables.
+The client will use the default credential provider chain. This typically
+involves:
+
+- `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_SESSION_TOKEN`
+  environment variables.
 - The `~/.aws/credentials` and `~/.aws/config` files.
 - IAM roles for EC2 instances or ECS tasks.
 
 ### Microsoft Azure
 
-The client will use the default credential provider chain. This typically involves:
+The client will use the default credential provider chain. This typically
+involves:
 - `AZURE_STORAGE_ACCOUNT` and `AZURE_STORAGE_ACCESS_KEY` environment variables.
 - Managed identity when running on Azure services.
 
@@ -102,23 +117,21 @@ async fn main() {
 
 ## Python Usage
 
-The Python bindings are built using PyO3 and maturin. Install from the local source:
+To install ixaccess you will need to be able to compile rust code. Make sure you
+have Rust installed (https://www.rust-lang.org/tools/install).
+
+After you have set up your project with `uv init` you can add `ixaccess` using
+the following:
 
 ```bash
-# From the `ixaccess` project root directory
-cd py/ixaccess
-pip install maturin
-maturin develop
+uv add git+https://github.com/ixpantia/ixaccess.git@<version> --subdirectory py/ixaccess
+
+## for examples for the version tagged with v0.1.0
+uv add git+https://github.com/ixpantia/ixaccess.git@v0.1.0 --subdirectory py/ixaccess
 ```
 
-Or build and install a wheel:
-
-```bash
-cd py/ixaccess
-pip install maturin
-maturin build --release
-pip install target/wheels/*.whl
-```
+This will install the IxAccess Rust binary and add the Python bindings to be
+used in your project.
 
 ### Example
 
@@ -160,15 +173,43 @@ assert "data-bucket-1" in viewer_buckets
 print(f"'viewer' has access to: {viewer_buckets}")
 ```
 
-## R Usage
+### Python development
 
-Install the R package from the local source:
+If you want to develop IxAccess with python note that the Python bindings are
+built using PyO3 and maturin. Install from the local source:
 
-```r
+```bash
 # From the `ixaccess` project root directory
-setwd("r/ixaccess")
-devtools::install()
+cd py/ixaccess
+pip install maturin
+maturin develop
 ```
+
+Or build and install a wheel:
+
+```bash
+cd py/ixaccess
+pip install maturin
+maturin build --release
+pip install target/wheels/*.whl
+```
+
+## R Usage
+To install ixaccess you will need to be able to compile rust code. Make sure you
+have Rust installed (https://www.rust-lang.org/tools/install).
+
+After you have set up your project with `rv init` you can add `ixaccess` using
+the following:
+
+```bash
+rv add git+https://github.com/ixpantia/ixaccess.git@<version> --subdirectory r/ixaccess
+
+## for examples for the version tagged with v0.1.0
+rv add git+https://github.com/ixpantia/ixaccess.git@v0.1.0 --subdirectory r/ixaccess
+```
+
+This will install the IxAccess Rust binary and add the R package to be used in
+your project.
 
 ### Example
 
@@ -205,4 +246,14 @@ print(paste("'admin' has access to:", paste(admin_buckets, collapse=", ")))
 viewer_buckets <- get_all_resources_for_role_by_tag(client, "viewer", "gcs_bucket")
 stopifnot("data-bucket-1" %in% viewer_buckets)
 print(paste("'viewer' has access to:", paste(viewer_buckets, collapse=", ")))
+```
+### R Development
+
+Install the R package from the local source for development you can do the
+following. This will include any changes to the cargo code in the compile step.
+
+```r
+# From the `ixaccess` project root directory
+setwd("r/ixaccess")
+devtools::install()
 ```
