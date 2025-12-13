@@ -124,10 +124,10 @@ After you have set up your project with `uv init` you can add `ixaccess` using
 the following:
 
 ```bash
-uv add git+https://github.com/ixpantia/ixaccess.git@<version> --subdirectory py/ixaccess
+uv add 'git+https://github.com/ixpantia/ixaccess.git@<version>#subdirectory=py/ixaccess'
 
 ## for examples for the version tagged with v0.1.0
-uv add git+https://github.com/ixpantia/ixaccess.git@v0.1.0 --subdirectory py/ixaccess
+uv add 'git+https://github.com/ixpantia/ixaccess.git@v0.1.0#subdirectory=py/ixaccess'
 ```
 
 This will install the IxAccess Rust binary and add the Python bindings to be
