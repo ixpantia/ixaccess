@@ -8,7 +8,7 @@ use std::num::NonZeroU32;
 pub struct Index(NonZeroU32);
 
 impl Index {
-    fn from_usize_index(v: usize) -> Index {
+    pub(crate) fn from_usize_index(v: usize) -> Index {
         let v = (v + 1) as u32;
         Index(unsafe { NonZeroU32::new_unchecked(v) })
     }

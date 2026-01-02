@@ -1,5 +1,6 @@
 use pyo3::exceptions::{PyException, PyRuntimeError};
 use pyo3::prelude::*;
+use std::collections::HashMap;
 use std::sync::Arc;
 
 // Import the Rust library
@@ -73,6 +74,56 @@ impl IxAccessClient {
                 .list_all_roles_for_role(role)
                 .await
                 .map_err(|e| PyException::new_err(format!("Failed to list roles for role: {}", e)))
+        })
+    }
+
+    /// Lists all roles that inherit from the given role.
+    ///
+    /// Args:
+    ///     role: The role name to query.
+    ///
+    /// Returns:
+    ///     A list of role names that inherit from the specified role.
+    ///
+    /// Example:
+    ///     >>> members = client.list_members_of("viewer")
+    fn list_members_of(&self, role: &str) -> PyResult<Vec<String>> {
+        self.runtime.block_on(async {
+            self.inner
+                .list_members_of(role)
+                .await
+                .map_err(|e| PyException::new_err(format!("Failed to list members of role: {}", e)))
+        })
+    }
+
+    /// Checks if a role exists.
+    fn exists_role(&self, role: &str) -> PyResult<bool> {
+        self.runtime.block_on(async {
+            self.inner
+                .exists_role(role)
+                .await
+                .map_err(|e| PyException::new_err(format!("Failed to check if role exists: {}", e)))
+        })
+    }
+
+    /// Checks if an assignee has been granted a specific role, directly or indirectly.
+    fn has_role(&self, assignee: &str, role: &str) -> PyResult<bool> {
+        self.runtime.block_on(async {
+            self.inner.has_role(assignee, role).await.map_err(|e| {
+                PyException::new_err(format!("Failed to check role assignment: {}", e))
+            })
+        })
+    }
+
+    /// Checks if a role (or any role it inherits from) has access to a specific resource.
+    fn has_resource(&self, role: &str, tag: &str, value: &str) -> PyResult<bool> {
+        self.runtime.block_on(async {
+            self.inner
+                .has_resource(role, tag, value)
+                .await
+                .map_err(|e| {
+                    PyException::new_err(format!("Failed to check resource access: {}", e))
+                })
         })
     }
 
@@ -174,6 +225,55 @@ impl IxAccessClient {
                 .await
                 .map_err(|e| {
                     PyException::new_err(format!("Failed to get resources for role: {}", e))
+                })
+        })
+    }
+
+    /// Gets all resources assigned to a role, grouped by tag.
+    ///
+    /// Args:
+    ///     role: The role name to query.
+    ///
+    /// Returns:
+    ///     A dictionary where keys are tags and values are lists of resource values.
+    fn get_all_resources_for_role(&self, role: &str) -> PyResult<HashMap<String, Vec<String>>> {
+        self.runtime.block_on(async {
+            self.inner
+                .get_all_resources_for_role(role)
+                .await
+                .map_err(|e| {
+                    PyException::new_err(format!("Failed to get all resources for role: {}", e))
+                })
+        })
+    }
+
+    /// Finds all roles that have been assigned a specific resource.
+    ///
+    /// Args:
+    ///     tag: The resource tag.
+    ///     value: The resource value.
+    fn find_roles_with_resource(&self, tag: &str, value: &str) -> PyResult<Vec<String>> {
+        self.runtime.block_on(async {
+            self.inner
+                .find_roles_with_resource(tag, value)
+                .await
+                .map_err(|e| {
+                    PyException::new_err(format!("Failed to find roles with resource: {}", e))
+                })
+        })
+    }
+
+    /// Finds all roles that have any resource with a specific tag.
+    ///
+    /// Args:
+    ///     tag: The resource tag to search for.
+    fn find_roles_with_resource_tag(&self, tag: &str) -> PyResult<Vec<String>> {
+        self.runtime.block_on(async {
+            self.inner
+                .find_roles_with_resource_tag(tag)
+                .await
+                .map_err(|e| {
+                    PyException::new_err(format!("Failed to find roles with resource tag: {}", e))
                 })
         })
     }

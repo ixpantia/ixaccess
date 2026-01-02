@@ -33,6 +33,23 @@ impl IxAccessClientInternal {
     fn list_all_roles_for_role(&self, role: &str) -> Result<Vec<String>> {
         Ok(block_on(self.inner.list_all_roles_for_role(role))?)
     }
+
+    fn list_members_of(&self, role: &str) -> Result<Vec<String>> {
+        Ok(block_on(self.inner.list_members_of(role))?)
+    }
+
+    fn exists_role(&self, role: &str) -> Result<bool> {
+        Ok(block_on(self.inner.exists_role(role))?)
+    }
+
+    fn has_role(&self, assignee: &str, role: &str) -> Result<bool> {
+        Ok(block_on(self.inner.has_role(assignee, role))?)
+    }
+
+    fn has_resource(&self, role: &str, tag: &str, value: &str) -> Result<bool> {
+        Ok(block_on(self.inner.has_resource(role, tag, value))?)
+    }
+
     fn add_role(&self, role: &str) -> Result<()> {
         Ok(block_on(self.inner.add_role(role))?)
     }
@@ -62,6 +79,21 @@ impl IxAccessClientInternal {
         Ok(block_on(
             self.inner.get_all_resources_for_role_by_tag(role, tag),
         )?)
+    }
+
+    fn get_all_resources_for_role(&self, role: &str) -> Result<List> {
+        let res = block_on(self.inner.get_all_resources_for_role(role))?;
+        let names: Vec<String> = res.keys().cloned().collect();
+        let values: Vec<Robj> = res.values().cloned().map(|v| v.into_robj()).collect();
+        Ok(List::from_names_and_values(names, values)?)
+    }
+
+    fn find_roles_with_resource(&self, tag: &str, value: &str) -> Result<Vec<String>> {
+        Ok(block_on(self.inner.find_roles_with_resource(tag, value))?)
+    }
+
+    fn find_roles_with_resource_tag(&self, tag: &str) -> Result<Vec<String>> {
+        Ok(block_on(self.inner.find_roles_with_resource_tag(tag))?)
     }
 
     fn unassign_role(&self, assignee: &str, role: &str) -> Result<()> {
