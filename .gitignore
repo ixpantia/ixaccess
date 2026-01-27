@@ -1,3 +1,4 @@
 target/
 *.ixaccess
 Cargo.lock
+.DS_Store

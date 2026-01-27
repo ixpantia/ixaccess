@@ -1,6 +1,6 @@
 use std::collections::{HashSet, VecDeque};
 
-use super::structure::{IxAccessStructureV1, RoleId};
+use super::{IxAccessStructureV1, RoleId};
 
 pub(super) struct IxAccessStructureV1BFS<'s> {
     pub structure: &'s IxAccessStructureV1,
