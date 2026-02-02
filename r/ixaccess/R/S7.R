@@ -174,3 +174,103 @@ S7::method(unassign_resource_from_role, IxAccessClient) <- function(
   )
   invisible(NULL)
 }
+
+#' List members of a role
+#'
+#' @param client An IxAccessClient object
+#' @param role The role name
+#' @return A character vector of role names
+#' @export
+list_members_of <- S7::new_generic("list_members_of", "client")
+
+#' @export
+S7::method(list_members_of, IxAccessClient) <- function(client, role) {
+  client@internal$list_members_of(role)
+}
+
+#' Check if a role exists
+#'
+#' @param client An IxAccessClient object
+#' @param role The role name
+#' @return A logical value indicating if the role exists
+#' @export
+exists_role <- S7::new_generic("exists_role", "client")
+
+#' @export
+S7::method(exists_role, IxAccessClient) <- function(client, role) {
+  client@internal$exists_role(role)
+}
+
+#' Check if an assignee has a specific role
+#'
+#' @param client An IxAccessClient object
+#' @param assignee The assignee role name
+#' @param role The role name to check for
+#' @return A logical value indicating if the assignee has the role
+#' @export
+has_role <- S7::new_generic("has_role", "client")
+
+#' @export
+S7::method(has_role, IxAccessClient) <- function(client, assignee, role) {
+  client@internal$has_role(assignee, role)
+}
+
+#' Check if a role has access to a specific resource
+#'
+#' @param client An IxAccessClient object
+#' @param role The role name
+#' @param resource_tag The resource tag
+#' @param resource_value The resource value
+#' @return A logical value indicating if the role has access to the resource
+#' @export
+has_resource <- S7::new_generic("has_resource", "client")
+
+#' @export
+S7::method(has_resource, IxAccessClient) <- function(
+  client,
+  role,
+  resource_tag,
+  resource_value
+) {
+  client@internal$has_resource(role, resource_tag, resource_value)
+}
+
+#' Get all resources for a role
+#'
+#' @param client An IxAccessClient object
+#' @param role The role name
+#' @return A list of character vectors, where each element is a resource tag and its value is a vector of resource values
+#' @export
+get_all_resources_for_role <- S7::new_generic("get_all_resources_for_role", "client")
+
+#' @export
+S7::method(get_all_resources_for_role, IxAccessClient) <- function(client, role) {
+  client@internal$get_all_resources_for_role(role)
+}
+
+#' Find roles with a specific resource
+#'
+#' @param client An IxAccessClient object
+#' @param tag The resource tag
+#' @param value The resource value
+#' @return A character vector of role names
+#' @export
+find_roles_with_resource <- S7::new_generic("find_roles_with_resource", "client")
+
+#' @export
+S7::method(find_roles_with_resource, IxAccessClient) <- function(client, tag, value) {
+  client@internal$find_roles_with_resource(tag, value)
+}
+
+#' Find roles with a specific resource tag
+#'
+#' @param client An IxAccessClient object
+#' @param tag The resource tag
+#' @return A character vector of role names
+#' @export
+find_roles_with_resource_tag <- S7::new_generic("find_roles_with_resource_tag", "client")
+
+#' @export
+S7::method(find_roles_with_resource_tag, IxAccessClient) <- function(client, tag) {
+  client@internal$find_roles_with_resource_tag(tag)
+}

@@ -18,6 +18,14 @@ IxAccessClientInternal$list_roles <- function() .Call(wrap__IxAccessClientIntern
 
 IxAccessClientInternal$list_all_roles_for_role <- function(role) .Call(wrap__IxAccessClientInternal__list_all_roles_for_role, self, role)
 
+IxAccessClientInternal$list_members_of <- function(role) .Call(wrap__IxAccessClientInternal__list_members_of, self, role)
+
+IxAccessClientInternal$exists_role <- function(role) .Call(wrap__IxAccessClientInternal__exists_role, self, role)
+
+IxAccessClientInternal$has_role <- function(assignee, role) .Call(wrap__IxAccessClientInternal__has_role, self, assignee, role)
+
+IxAccessClientInternal$has_resource <- function(role, tag, value) .Call(wrap__IxAccessClientInternal__has_resource, self, role, tag, value)
+
 IxAccessClientInternal$add_role <- function(role) .Call(wrap__IxAccessClientInternal__add_role, self, role)
 
 IxAccessClientInternal$add_roles <- function(roles) .Call(wrap__IxAccessClientInternal__add_roles, self, roles)
@@ -27,6 +35,12 @@ IxAccessClientInternal$assign_role <- function(assignee, role) .Call(wrap__IxAcc
 IxAccessClientInternal$assign_resource_to_role <- function(role, resource_tag, resource_value) .Call(wrap__IxAccessClientInternal__assign_resource_to_role, self, role, resource_tag, resource_value)
 
 IxAccessClientInternal$get_all_resources_for_role_by_tag <- function(role, tag) .Call(wrap__IxAccessClientInternal__get_all_resources_for_role_by_tag, self, role, tag)
+
+IxAccessClientInternal$get_all_resources_for_role <- function(role) .Call(wrap__IxAccessClientInternal__get_all_resources_for_role, self, role)
+
+IxAccessClientInternal$find_roles_with_resource <- function(tag, value) .Call(wrap__IxAccessClientInternal__find_roles_with_resource, self, tag, value)
+
+IxAccessClientInternal$find_roles_with_resource_tag <- function(tag) .Call(wrap__IxAccessClientInternal__find_roles_with_resource_tag, self, tag)
 
 IxAccessClientInternal$unassign_role <- function(assignee, role) .Call(wrap__IxAccessClientInternal__unassign_role, self, assignee, role)
 

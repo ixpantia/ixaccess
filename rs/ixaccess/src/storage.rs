@@ -41,7 +41,7 @@
 use std::sync::Arc;
 
 use bytes::Bytes;
-use object_store::{DynObjectStore, ObjectStore, PutMode, PutOptions, path::Path};
+use object_store::{path::Path, DynObjectStore, ObjectStore, PutMode, PutOptions};
 
 pub type Result<T> = std::result::Result<T, StorageError>;
 
