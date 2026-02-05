@@ -14,3 +14,5 @@ SystemRequirements: Cargo (Rust's package manager), rustc >= 1.85, xz
 Config/build/bootstrap: TRUE
 Depends:
     R (>= 4.2)
+Imports:
+    S7
