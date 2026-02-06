@@ -241,10 +241,16 @@ S7::method(has_resource, IxAccessClient) <- function(
 #' @param role The role name
 #' @return A list of character vectors, where each element is a resource tag and its value is a vector of resource values
 #' @export
-get_all_resources_for_role <- S7::new_generic("get_all_resources_for_role", "client")
+get_all_resources_for_role <- S7::new_generic(
+  "get_all_resources_for_role",
+  "client"
+)
 
 #' @export
-S7::method(get_all_resources_for_role, IxAccessClient) <- function(client, role) {
+S7::method(get_all_resources_for_role, IxAccessClient) <- function(
+  client,
+  role
+) {
   client@internal$get_all_resources_for_role(role)
 }
 
@@ -255,10 +261,17 @@ S7::method(get_all_resources_for_role, IxAccessClient) <- function(client, role)
 #' @param value The resource value
 #' @return A character vector of role names
 #' @export
-find_roles_with_resource <- S7::new_generic("find_roles_with_resource", "client")
+find_roles_with_resource <- S7::new_generic(
+  "find_roles_with_resource",
+  "client"
+)
 
 #' @export
-S7::method(find_roles_with_resource, IxAccessClient) <- function(client, tag, value) {
+S7::method(find_roles_with_resource, IxAccessClient) <- function(
+  client,
+  tag,
+  value
+) {
   client@internal$find_roles_with_resource(tag, value)
 }
 
@@ -268,9 +281,29 @@ S7::method(find_roles_with_resource, IxAccessClient) <- function(client, tag, va
 #' @param tag The resource tag
 #' @return A character vector of role names
 #' @export
-find_roles_with_resource_tag <- S7::new_generic("find_roles_with_resource_tag", "client")
+find_roles_with_resource_tag <- S7::new_generic(
+  "find_roles_with_resource_tag",
+  "client"
+)
 
 #' @export
-S7::method(find_roles_with_resource_tag, IxAccessClient) <- function(client, tag) {
+S7::method(find_roles_with_resource_tag, IxAccessClient) <- function(
+  client,
+  tag
+) {
   client@internal$find_roles_with_resource_tag(tag)
+}
+
+#' Delete a role
+#'
+#' @param client An IxAccessClient object
+#' @param role The role name to delete
+#' @return NULL (invisibly)
+#' @export
+delete_role <- S7::new_generic("delete_role", "client")
+
+#' @export
+S7::method(delete_role, IxAccessClient) <- function(client, role) {
+  client@internal$delete_role(role)
+  invisible(NULL)
 }

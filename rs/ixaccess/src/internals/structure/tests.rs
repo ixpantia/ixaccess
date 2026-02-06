@@ -1397,3 +1397,294 @@ fn test_unassign_resource_unicode() {
     assert_eq!(urls.len(), 1);
     assert_eq!(urls[0], "https://example.com/文档");
 }
+
+#[test]
+fn test_delete_role_leaf() {
+    let mut structure = IxAccessStructureV1::new();
+    structure.add_role(&Role::new("admin"));
+    structure.add_role(&Role::new("editor"));
+    structure
+        .assign_role(&Role::new("admin"), &Role::new("editor"))
+        .unwrap();
+
+    structure.delete_role(&Role::new("editor"));
+
+    assert!(!structure.exists_role(&Role::new("editor")));
+    assert!(structure.exists_role(&Role::new("admin")));
+
+    let roles: Vec<_> = structure
+        .list_all_roles_for_role(&Role::new("admin"))
+        .unwrap()
+        .collect();
+    assert_eq!(roles, vec!["admin"]);
+}
+
+#[test]
+fn test_delete_role_parent() {
+    let mut structure = IxAccessStructureV1::new();
+    structure.add_role(&Role::new("admin"));
+    structure.add_role(&Role::new("editor"));
+    structure
+        .assign_role(&Role::new("admin"), &Role::new("editor"))
+        .unwrap();
+
+    structure.delete_role(&Role::new("admin"));
+
+    assert!(!structure.exists_role(&Role::new("admin")));
+    assert!(structure.exists_role(&Role::new("editor")));
+}
+
+#[test]
+fn test_delete_role_with_resources() {
+    let mut structure = IxAccessStructureV1::new();
+    structure.add_role(&Role::new("admin"));
+    structure
+        .assign_resource_to_role(&Role::new("admin"), "tag", "value")
+        .unwrap();
+
+    structure.delete_role(&Role::new("admin"));
+
+    assert!(!structure.exists_role(&Role::new("admin")));
+
+    // Check if resources are purged by re-adding and checking
+    structure.add_role(&Role::new("admin"));
+    let resources = structure
+        .get_all_resources_for_role(&Role::new("admin"))
+        .unwrap();
+    assert!(resources.is_empty());
+}
+
+#[test]
+fn test_delete_role_list_roles() {
+    let mut structure = IxAccessStructureV1::new();
+    structure.add_role(&Role::new("admin"));
+    structure.add_role(&Role::new("editor"));
+
+    structure.delete_role(&Role::new("admin"));
+
+    let roles: Vec<_> = structure.list_roles().collect();
+    assert_eq!(roles, vec!["editor"]);
+}
+
+#[test]
+fn test_delete_role_redundant_path_preservation() {
+    // Scenario: A -> B -> C and A -> C (Triangle). Delete B.
+    // Expectation: A still has access to C.
+    let mut structure = IxAccessStructureV1::new();
+    structure.add_role(&Role::new("a"));
+    structure.add_role(&Role::new("b"));
+    structure.add_role(&Role::new("c"));
+
+    structure
+        .assign_role(&Role::new("a"), &Role::new("b"))
+        .unwrap();
+    structure
+        .assign_role(&Role::new("b"), &Role::new("c"))
+        .unwrap();
+    structure
+        .assign_role(&Role::new("a"), &Role::new("c"))
+        .unwrap();
+
+    structure.delete_role(&Role::new("b"));
+
+    assert!(structure.has_role(&Role::new("a"), &Role::new("c")));
+}
+
+#[test]
+fn test_delete_role_transitive_revocation() {
+    // Scenario: A -> B -> C. Delete B.
+    // Expectation: A loses access to C.
+    let mut structure = IxAccessStructureV1::new();
+    structure.add_role(&Role::new("a"));
+    structure.add_role(&Role::new("b"));
+    structure.add_role(&Role::new("c"));
+
+    structure
+        .assign_role(&Role::new("a"), &Role::new("b"))
+        .unwrap();
+    structure
+        .assign_role(&Role::new("b"), &Role::new("c"))
+        .unwrap();
+
+    assert!(structure.has_role(&Role::new("a"), &Role::new("c")));
+
+    structure.delete_role(&Role::new("b"));
+
+    assert!(!structure.has_role(&Role::new("a"), &Role::new("c")));
+}
+
+#[test]
+fn test_delete_role_diamond_dependency() {
+    // Scenario: A -> B -> D and A -> C -> D. Delete B.
+    // Expectation: A still has access to D via C.
+    let mut structure = IxAccessStructureV1::new();
+    structure.add_role(&Role::new("a"));
+    structure.add_role(&Role::new("b"));
+    structure.add_role(&Role::new("c"));
+    structure.add_role(&Role::new("d"));
+
+    structure
+        .assign_role(&Role::new("a"), &Role::new("b"))
+        .unwrap();
+    structure
+        .assign_role(&Role::new("a"), &Role::new("c"))
+        .unwrap();
+    structure
+        .assign_role(&Role::new("b"), &Role::new("d"))
+        .unwrap();
+    structure
+        .assign_role(&Role::new("c"), &Role::new("d"))
+        .unwrap();
+
+    structure.delete_role(&Role::new("b"));
+
+    assert!(structure.has_role(&Role::new("a"), &Role::new("d")));
+}
+
+#[test]
+fn test_delete_role_self_inheritance() {
+    // Scenario: A -> A (Self-inheritance). Delete A.
+    // Expectation: No panic, role is removed.
+    let mut structure = IxAccessStructureV1::new();
+    structure.add_role(&Role::new("a"));
+    structure
+        .assign_role(&Role::new("a"), &Role::new("a"))
+        .unwrap();
+
+    structure.delete_role(&Role::new("a"));
+
+    assert!(!structure.exists_role(&Role::new("a")));
+}
+
+#[test]
+fn test_delete_role_total_exhaustion() {
+    // Scenario: Delete all roles one by one.
+    // Expectation: Internal vectors are empty.
+    let mut structure = IxAccessStructureV1::new();
+    structure.add_role(&Role::new("a"));
+    structure.add_role(&Role::new("b"));
+    structure
+        .assign_role(&Role::new("a"), &Role::new("b"))
+        .unwrap();
+
+    structure.delete_role(&Role::new("a"));
+    structure.delete_role(&Role::new("b"));
+
+    assert_eq!(structure.list_roles().count(), 0);
+    assert_eq!(structure.role_graph.len(), 0);
+    assert_eq!(structure.resource_assignment.len(), 0);
+}
+
+#[test]
+fn test_delete_role_boundary_elements() {
+    // Scenario: Delete first and last elements specifically.
+    // Expectation: Mapping handles boundaries correctly.
+    let mut structure = IxAccessStructureV1::new();
+    structure.add_role(&Role::new("first"));
+    structure.add_role(&Role::new("middle"));
+    structure.add_role(&Role::new("last"));
+
+    // Delete first
+    structure.delete_role(&Role::new("first"));
+    assert_eq!(
+        structure.list_roles().collect::<Vec<_>>(),
+        vec!["middle", "last"]
+    );
+
+    // Delete last
+    structure.delete_role(&Role::new("last"));
+    assert_eq!(structure.list_roles().collect::<Vec<_>>(), vec!["middle"]);
+}
+
+#[test]
+fn test_delete_role_preserves_unrelated_inheritance() {
+    let mut structure = IxAccessStructureV1::new();
+    structure.add_role(&Role::new("a"));
+    structure.add_role(&Role::new("b"));
+    structure.add_role(&Role::new("c"));
+    structure.add_role(&Role::new("to_delete"));
+
+    structure
+        .assign_role(&Role::new("a"), &Role::new("b"))
+        .unwrap();
+    structure
+        .assign_role(&Role::new("b"), &Role::new("c"))
+        .unwrap();
+    structure
+        .assign_role(&Role::new("to_delete"), &Role::new("c"))
+        .unwrap();
+
+    structure.delete_role(&Role::new("to_delete"));
+
+    assert!(structure.has_role(&Role::new("a"), &Role::new("c")));
+    assert!(structure.has_role(&Role::new("b"), &Role::new("c")));
+}
+
+#[test]
+fn test_delete_role_preserves_unrelated_resources() {
+    let mut structure = IxAccessStructureV1::new();
+    structure.add_role(&Role::new("keep"));
+    structure.add_role(&Role::new("drop"));
+
+    structure
+        .assign_resource_to_role(&Role::new("keep"), "tag", "val1")
+        .unwrap();
+    structure
+        .assign_resource_to_role(&Role::new("drop"), "tag", "val2")
+        .unwrap();
+
+    structure.delete_role(&Role::new("drop"));
+
+    let resources: Vec<_> = structure
+        .get_all_resources_for_role_by_tag(&Role::new("keep"), "tag")
+        .unwrap()
+        .collect();
+    assert_eq!(resources, vec!["val1"]);
+}
+
+#[test]
+fn test_delete_role_cleans_up_incoming_edges() {
+    let mut structure = IxAccessStructureV1::new();
+    structure.add_role(&Role::new("parent"));
+    structure.add_role(&Role::new("child"));
+    structure
+        .assign_role(&Role::new("parent"), &Role::new("child"))
+        .unwrap();
+
+    structure.delete_role(&Role::new("child"));
+
+    // Parent should still exist but have no children
+    assert!(structure.exists_role(&Role::new("parent")));
+    let children: Vec<_> = structure
+        .list_all_roles_for_role(&Role::new("parent"))
+        .unwrap()
+        .collect();
+    assert_eq!(children, vec!["parent"]);
+}
+
+#[test]
+fn test_delete_nonexistent_role_is_noop() {
+    let mut structure = IxAccessStructureV1::new();
+    structure.add_role(&Role::new("a"));
+    structure.delete_role(&Role::new("b"));
+    assert!(structure.exists_role(&Role::new("a")));
+    assert_eq!(structure.list_roles().count(), 1);
+}
+
+#[test]
+fn test_delete_and_readd_role() {
+    let mut structure = IxAccessStructureV1::new();
+    structure.add_role(&Role::new("admin"));
+    structure
+        .assign_resource_to_role(&Role::new("admin"), "tag", "value")
+        .unwrap();
+
+    structure.delete_role(&Role::new("admin"));
+    structure.add_role(&Role::new("admin"));
+
+    assert!(structure.exists_role(&Role::new("admin")));
+    let resources = structure
+        .get_all_resources_for_role(&Role::new("admin"))
+        .unwrap();
+    assert!(resources.is_empty());
+}

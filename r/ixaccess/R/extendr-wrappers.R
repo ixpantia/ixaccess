@@ -46,6 +46,8 @@ IxAccessClientInternal$unassign_role <- function(assignee, role) .Call(wrap__IxA
 
 IxAccessClientInternal$unassign_resource_from_role <- function(role, resource_tag, resource_value) .Call(wrap__IxAccessClientInternal__unassign_resource_from_role, self, role, resource_tag, resource_value)
 
+IxAccessClientInternal$delete_role <- function(role) .Call(wrap__IxAccessClientInternal__delete_role, self, role)
+
 #' @export
 `$.IxAccessClientInternal` <- function (self, name) { func <- IxAccessClientInternal[[name]]; environment(func) <- environment(); func }
 
