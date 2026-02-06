@@ -112,6 +112,10 @@ impl IxAccessClientInternal {
             resource_value,
         ))?)
     }
+
+    fn delete_role(&self, role: &str) -> Result<()> {
+        Ok(block_on(self.inner.delete_role(role))?)
+    }
 }
 
 // Macro to generate exports.

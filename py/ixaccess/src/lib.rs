@@ -319,6 +319,22 @@ impl IxAccessClient {
                 })
         })
     }
+
+    /// Deletes a role from the access control structure.
+    ///
+    /// Args:
+    ///     role: The name of the role to delete.
+    ///
+    /// Example:
+    ///     >>> client.delete_role("admin")
+    fn delete_role(&self, role: &str) -> PyResult<()> {
+        self.runtime.block_on(async {
+            self.inner
+                .delete_role(role)
+                .await
+                .map_err(|e| PyException::new_err(format!("Failed to delete role: {}", e)))
+        })
+    }
 }
 
 /// IxAccess Python module - A library for managing access control roles and resources.

@@ -83,4 +83,20 @@ impl IxAccessClient {
             .await?;
         Ok(())
     }
+
+    /// Deletes a role from the access control structure.
+    ///
+    /// This removes the role, all its assignments to other roles, and all its
+    /// resource assignments.
+    pub async fn delete_role(&self, role: impl AsRef<str>) -> Result<(), StorageError> {
+        let role = Role::new(role);
+        self.storage
+            .update_file(&self.path, |b| {
+                let mut structure = IxAccessStructureV1::read_from_buffer(&b);
+                structure.delete_role(&role);
+                Ok(structure.to_bytes())
+            })
+            .await?;
+        Ok(())
+    }
 }
