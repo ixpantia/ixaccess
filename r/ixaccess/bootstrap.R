@@ -31,5 +31,3 @@ lines <- gsub('"py/ixaccess",', "", lines, fixed = TRUE)
 print(lines)
 # remove unnecessary workspace members
 writeLines(lines, top_cargo_toml)
-
-rextendr::vendor_pkgs()
